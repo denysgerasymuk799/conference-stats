@@ -858,6 +858,155 @@ def count_topics(path: Path) -> tuple[int, list[tuple[str, int]]]:
 
 
 # ---------------------------------------------------------------------------
+# Healthcare-specific sub-topic patterns
+# Applied only to the filtered healthcare paper subset.
+# ---------------------------------------------------------------------------
+
+HEALTHCARE_TOPIC_PATTERNS: list[tuple[str, re.Pattern]] = [
+    ("Neuroscience & Brain", re.compile(
+        r"neuroscience|computational neuroscience|"
+        r"spiking neural (network|model)|neuromorphic|"
+        r"(?:brain|neural) decoding|brain.computer interface|"
+        r"neuroimaging|brain activity|"
+        r"cognitive (science|model|neuroscience)|"
+        r"visual cortex|brain.inspired|neural (dynamics|oscillation)|"
+        r"electrophysiology|spike (sorting|train)|neuro.?ai",
+        re.I,
+    )),
+    ("Protein & Molecular Design", re.compile(
+        r"protein (design|structure|folding|language|generation|engineering)|"
+        r"molecular (dynamics|design|generation|simulation|property)|"
+        r"molecule (generation|design|property)|"
+        r"protein language model|"
+        r"(?:geometric|equivariant) (deep learning|graph).{0,30}(?:protein|molecule|drug|bio)|"
+        r"(?<!\w)proteins?(?!\w)|amino acid|enzyme",
+        re.I,
+    )),
+    ("Generative Models for Biology", re.compile(
+        r"diffusion .{0,40}(?:protein|molecule|drug|bio|cell|medical)|"
+        r"(?:protein|molecule|drug|cell|medical).{0,40}diffusion|"
+        r"flow matching.{0,40}(?:protein|molecule|drug|bio)|"
+        r"(?:protein|molecule|drug|bio).{0,40}flow matching|"
+        r"discrete diffusion|"
+        r"(?:molecular|protein|drug|cell).{0,20}(?:generation|generative)|"
+        r"generative.{0,30}(?:molecule|protein|drug|biology)",
+        re.I,
+    )),
+    ("Medical Imaging", re.compile(
+        r"medical (imaging|image|segmentation|report|scan|diagnosis)|"
+        r"computational pathology|radiology report|"
+        r"(?:ct|x.ray|histolog|patholog).{0,40}(analysis|classification|detection|segmentation)|"
+        r"(?:ultrasound|mammograph).{0,30}(analysis|detection|segmentation)|"
+        r"medical (image|scan) (analysis|classification|synthesis|reconstruction)|"
+        r"(?:tumor|lesion|nodule|polyp) (detection|segmentation)|"
+        r"whole.slide image|digital pathology|fundus",
+        re.I,
+    )),
+    # MRI here only for structural/anatomical imaging; functional fMRI → Biosignals
+    ("Biosignals & Physiological", re.compile(
+        r"(?<!\w)eeg(?!\w)|electroencephalograph|electroencephalogram|"
+        r"(?<!\w)ecg(?!\w)|electrocardiograph|electrocardiogram|"
+        r"(?<!\w)emg(?!\w)|electromyograph|electromyogram|"
+        r"(?<!\w)fmri(?!\w)|(?<!\w)ppg(?!\w)|(?<!\w)eog(?!\w)|"
+        r"biosignal|physiological (signal|data|time.series)|"
+        r"medical time.series|clinical time.series|"
+        r"time.series.{0,40}(?:clinical|medical|health|patient|physiolog)|"
+        r"brain (signal|wave|rhythm|oscillation|decoding).{0,30}(?:classif|recogni|detect|predict|model|learn)|"
+        r"neural (signal|recording|decoding|oscillation)|"
+        r"wearable.{0,30}(?:health|sensor|monitor)|"
+        r"cardiac (signal|arrhythmia|monitoring|classification)|"
+        r"atrial fibrillation|heart failure.{0,30}(?:predict|detect|monitor)|"
+        r"sleep (staging|monitor|apnea|scoring|disorder)|"
+        r"epilepsy|seizure (detection|prediction)|"
+        r"heart rate variability|(?<!\w)hrv(?!\w)|"
+        r"(?:heart rate|pulse rate).{0,30}(?:monitor|detect|estimat|variability)|"
+        r"respiratory (signal|rate|monitoring|sound)|"
+        r"blood pressure.{0,30}(?:monitor|predict|estimat)|"
+        r"glucose (monitor|management|predict)|continuous glucose|(?<!\w)cgm(?!\w)|"
+        r"activity recognition.{0,30}(?:health|wearable|sensor|body|human)|"
+        r"motor imagery|brain.computer interface|(?<!\w)bci(?!\w)|"
+        r"mental (health|stress|fatigue|workload).{0,30}(?:detect|monitor|classif|recogni|predict)",
+        re.I,
+    )),
+    ("Foundation Models for Health", re.compile(
+        r"foundation model|"
+        r"protein language model|"
+        r"(?:medical|clinical|health|bio).{0,30}(?:multimodal|vision.language|vqa)|"
+        r"(?:multimodal|vision.language).{0,30}(?:medical|clinical|health|bio)|"
+        r"medical vqa|health (chatbot|assistant|copilot)|"
+        r"(?:medical|clinical|genomic) (gpt|bert|t5)|"
+        r"(?<!\w)(?:biogpt|biomed.bert|gatortron|clinicalbert)(?!\w)",
+        re.I,
+    )),
+    ("Genomics & Bioinformatics", re.compile(
+        r"genomic|genome|(?<!\w)rna(?!\w)|(?<!\w)dna(?!\w)|"
+        r"single.cell|spatial transcriptomic|"
+        r"gene (expression|regulatory|editing|network)|"
+        r"(?:epigenomic|transcriptomic|proteomic|multi.omic)|"
+        r"bioinformatic|scRNA|chromatin|CRISPR",
+        re.I,
+    )),
+    # Specific clinical-outcome focus; avoids generic 'clinical' or 'patient'
+    ("Clinical Decision Support", re.compile(
+        r"electronic health record|(?<!\w)ehr(?!\w)|"
+        r"clinical decision (support|making)|"
+        r"(?:disease|condition|risk) (prediction|prognosis|stratification)|"
+        r"(?:mortality|readmission|length.of.stay) (prediction|model)|"
+        r"survival (analysis|prediction|model)|"
+        r"(?:mental health|depression|anxiety|psychiatric|schizophrenia) .{0,30}(?:detect|predict|classif|diagnos)|"
+        r"(?:drug|medication|treatment) (response|efficacy|outcome|adherence)|"
+        r"(?:medical|clinical) (report|note) (generation|summarization|classification)|"
+        r"clinical trial|patient (triage|monitoring|stratification)",
+        re.I,
+    )),
+    ("Drug Discovery", re.compile(
+        r"drug (discovery|design|repurposing|screening|interaction)|"
+        r"(?:virtual|in.silico) screening|"
+        r"(?:target|binding site|active site) (prediction|identification)|"
+        r"ADMET|pharmacokinetic|docking|"
+        r"(?:small molecule|compound|ligand) (generation|optimization|property)|"
+        r"molecular docking|lead optimization",
+        re.I,
+    )),
+    ("Interpretability in Healthcare", re.compile(
+        r"(?:medical|clinical|health|biolog).{0,40}(?:interpretabilit|explainabilit|causal)|"
+        r"(?:interpretabilit|explainabilit).{0,40}(?:medical|clinical|health|biolog)|"
+        r"biomarker (discovery|identification|prediction)|"
+        r"(?:feature|gene|protein) (importance|attribution).{0,30}(?:medical|biolog|clinical)|"
+        r"counterfactual.{0,30}(?:medical|clinical|patient)|"
+        r"concept.{0,20}(?:medical|clinical|health)",
+        re.I,
+    )),
+]
+
+
+def count_healthcare_topics(path: Path) -> tuple[int, list[tuple[str, int]]]:
+    wb = openpyxl.load_workbook(path)
+    ws = wb.active
+    h  = {c.value: i for i, c in enumerate(ws[1])}
+
+    def col(row, name):
+        idx = h.get(name)
+        return str(row[idx] or "") if idx is not None else ""
+
+    counts = {name: 0 for name, _ in HEALTHCARE_TOPIC_PATTERNS}
+    total  = 0
+    for row in ws.iter_rows(min_row=2, values_only=True):
+        search_all = (col(row, "Title") + " " + col(row, "Keywords") + " "
+                      + col(row, "Primary Area")).lower()
+        if not any(t in search_all for t in HEALTHCARE_TERMS):
+            continue
+        total += 1
+        search_tkw = (col(row, "Title") + " " + col(row, "Keywords")).lower()
+        for name, pat in HEALTHCARE_TOPIC_PATTERNS:
+            if pat.search(search_tkw):
+                counts[name] += 1
+
+    ranked = sorted(counts.items(), key=lambda x: x[1], reverse=True)
+    return total, ranked
+
+
+# ---------------------------------------------------------------------------
 # AI-safety-specific sub-topic patterns
 # Applied only to the filtered AI safety paper subset.
 # ---------------------------------------------------------------------------
@@ -1118,6 +1267,31 @@ def plot_trending_topics(output_path: Path):
     print(f"Saved → {output_path}")
 
 
+def plot_trending_topics_healthcare(output_path: Path):
+    path = DATA_DIR / "ICLR_2026.xlsx"
+    if not path.exists():
+        raise FileNotFoundError(f"Missing: {path}")
+    print("Counting healthcare sub-topics in ICLR 2026 …")
+    total, ranked = count_healthcare_topics(path)
+    top10 = ranked[:10]
+    print(f"  Total healthcare papers: {total}")
+    for name, count in top10:
+        print(f"  {count:5d} ({count/total*100:5.1f}%)  {name}")
+
+    html = build_table_html(
+        title="ICLR 2026 — Top 10 Healthcare Topics",
+        footer=(
+            f"Among {total:,} accepted Healthcare &amp; Life Sciences papers (matched by medical, biological, "
+            f"or clinical keywords, title, or primary area). A paper can match multiple topics. Source: OpenReview."
+        ),
+        topics=top10,
+        total=total,
+    )
+    print("Rendering table …")
+    screenshot_html(html, output_path)
+    print(f"Saved → {output_path}")
+
+
 def plot_trending_topics_ai_safety(output_path: Path):
     path = DATA_DIR / "ICLR_2026.xlsx"
     if not path.exists():
@@ -1230,6 +1404,7 @@ PLOTS = {
     "contribution_archetypes_ai_safety": plot_archetypes_ai_safety,
     "trending_topics": plot_trending_topics,
     "trending_topics_ai_safety": plot_trending_topics_ai_safety,
+    "trending_topics_healthcare": plot_trending_topics_healthcare,
 }
 
 
