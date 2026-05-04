@@ -1,0 +1,92 @@
+{
+  "2022": {
+    "total": 1094,
+    "ai_safety_total": 162,
+    "archetypes": {
+      "New Method": 478,
+      "Empirical Study": 174,
+      "Theory": 162,
+      "Benchmark / Dataset": 22,
+      "Other": 258
+    },
+    "ai_safety_archetypes": {
+      "New Method": 66,
+      "Empirical Study": 34,
+      "Theory": 24,
+      "Benchmark / Dataset": 4,
+      "Other": 34
+    }
+  },
+  "2023": {
+    "total": 1573,
+    "ai_safety_total": 264,
+    "archetypes": {
+      "New Method": 1011,
+      "Empirical Study": 258,
+      "Theory": 225,
+      "Benchmark / Dataset": 21,
+      "Other": 58
+    },
+    "ai_safety_archetypes": {
+      "New Method": 142,
+      "Empirical Study": 80,
+      "Theory": 36,
+      "Benchmark / Dataset": 1,
+      "Other": 5
+    }
+  },
+  "2024": {
+    "total": 2260,
+    "ai_safety_total": 392,
+    "archetypes": {
+      "New Method": 1286,
+      "Empirical Study": 358,
+      "Theory": 294,
+      "Benchmark / Dataset": 116,
+      "Other": 206
+    },
+    "ai_safety_archetypes": {
+      "New Method": 186,
+      "Empirical Study": 128,
+      "Theory": 39,
+      "Benchmark / Dataset": 15,
+      "Other": 24
+    }
+  },
+  "2025": {
+    "total": 3703,
+    "ai_safety_total": 802,
+    "archetypes": {
+      "New Method": 1964,
+      "Empirical Study": 676,
+      "Theory": 399,
+      "Benchmark / Dataset": 294,
+      "Other": 370
+    },
+    "ai_safety_archetypes": {
+      "New Method": 362,
+      "Empirical Study": 309,
+      "Theory": 64,
+      "Benchmark / Dataset": 35,
+      "Other": 32
+    }
+  },
+  "2026": {
+    "total": 5356,
+    "ai_safety_total": 1097,
+    "archetypes": {
+      "New Method": 3031,
+      "Empirical Study": 801,
+      "Theory": 550,
+      "Benchmark / Dataset": 533,
+      "Other": 441
+    },
+    "ai_safety_archetypes": {
+      "New Method": 537,
+      "Empirical Study": 375,
+      "Theory": 84,
+      "Benchmark / Dataset": 60,
+      "Other": 41
+    }
+  }
+}
