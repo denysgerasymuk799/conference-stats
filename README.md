@@ -16,6 +16,22 @@ Accepted submissions have grown ~3× over five years, from ~1,100 in 2022 to ove
 
 ---
 
+### Contribution Archetypes — All Papers
+
+Each accepted paper is classified into one of five contribution types: **New Method**, **Empirical Study**, **Theory**, **Benchmark / Dataset**, or **Other**.
+
+![Contribution archetypes](iclr_2026/plots/contribution_archetypes.png)
+
+---
+
+### Contribution Archetypes — AI Safety & Alignment Papers
+
+Same classification, restricted to the AI safety subset.
+
+![Contribution archetypes – AI safety](iclr_2026/plots/contribution_archetypes_ai_safety.png)
+
+---
+
 ### Trending Topics — All Papers
 
 Topic counts for ICLR 2026. A paper can match multiple topics; the denominator is the total number of accepted papers.
@@ -37,22 +53,6 @@ Filtered to papers whose title, keywords, or primary area contain safety-related
 Filtered to papers whose title, keywords, or primary area contain healthcare-related terms (clinical, medical, biological, genomic, etc.).
 
 ![Trending topics – healthcare](iclr_2026/plots/trending_topics_healthcare.png)
-
----
-
-### Contribution Archetypes — All Papers
-
-Each accepted paper is classified into one of five contribution types: **New Method**, **Empirical Study**, **Theory**, **Benchmark / Dataset**, or **Other**.
-
-![Contribution archetypes](iclr_2026/plots/contribution_archetypes.png)
-
----
-
-### Contribution Archetypes — AI Safety & Alignment Papers
-
-Same classification, restricted to the AI safety subset.
-
-![Contribution archetypes – AI safety](iclr_2026/plots/contribution_archetypes_ai_safety.png)
 
 ---
 
