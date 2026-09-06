@@ -1,6 +1,6 @@
 # Conference Stats
 
-Data-driven visualizations of accepted paper trends at top ML conferences, starting with **ICLR 2026**.
+Data-driven visualizations of accepted paper trends at top ML conferences — **ICLR 2026** and **ICML 2026**.
 
 All charts are generated from raw OpenReview metadata — no manual labeling, no external APIs at inference time. The pipeline fetches paper titles, abstracts, keywords, and primary areas, then classifies each paper with a rule-based multi-signal scorer to produce publication-ready PNG charts.
 
@@ -98,6 +98,54 @@ Available plot names:
 | `trending_topics` | Table — top topics, all ICLR 2026 papers |
 | `trending_topics_ai_safety` | Table — top topics, AI safety papers |
 | `trending_topics_healthcare` | Table — top topics, healthcare papers |
+
+---
+
+## ICML 2026 — Dataset
+
+`icml_2026/data/ICML_2026.xlsx` holds all **6,341 accepted ICML 2026 main-conference papers** (Seoul, July 6–11 2026), in the same shape as the ICLR file plus two extra columns.
+
+| Column | Notes |
+|---|---|
+| `Decision` | `Oral` (159) / `Spotlight` (377) / `Poster` (5,805) — presentation format in the official program |
+| `Spotlight` | `Yes` for the 536 papers whose OpenReview venue is *ICML 2026 spotlight* (they present as either an oral or a spotlight talk) |
+| `Title`, `Authors`, `Abstract`, `Primary Area`, `Keywords` | OpenReview camera-ready metadata |
+| `Institutions` | Per-author affiliation, aligned with `Authors` (98% of authors resolved) |
+| `Paper Type` | `Benchmark` (342) / `Evaluation` (99) / `Other` (5,900) |
+| `Date (KST)`, `Start (KST)`, `End (KST)`, `Location`, `Poster #`, `Session` | Poster-session placement in Seoul local time; blank for the 725 papers with no in-person slot |
+| `OpenReview URL`, `Virtual Site URL` | Links |
+
+### Data Collection (`fetch_icml_openreview.py`)
+
+```bash
+python icml_2026/src/fetch_icml_openreview.py 2026            # writes data/ICML_2026.xlsx
+python icml_2026/src/fetch_icml_openreview.py 2026 --refresh  # ignore data/cache/
+```
+
+Two public sources are merged on the OpenReview forum id:
+
+| Source | Provides | Access note |
+|---|---|---|
+| `api2.openreview.net/notes/search` | Title, authors, abstract, primary area, keywords, venue label | The plain `/notes` endpoint now sits behind a Cloudflare Turnstile challenge for anonymous clients, so the script sweeps the still-open search endpoint over a stop-word list and unions the results (`a` + `the` + `we` already cover all 6,341 papers) |
+| `icml.cc` virtual-site program JSON | Institutions, presentation type, room, poster number, session, times | OpenReview serves no affiliations without a login, so institutions come from the conference program. The live static snapshot is currently truncated to its first API page and the API behind it needs an icml.cc account, so the script falls back to the newest **complete** snapshot in the Wayback Machine and layers the live file on top |
+
+The two sources agree exactly — the 6,341 accepted OpenReview notes and the 6,341 conference-track program entries are the same set, and their spotlight designations match on every paper.
+
+### Paper-Type Classification (`classify_paper_type.py`)
+
+The same style of offline multi-signal scorer used for ICLR archetypes, run over the title and abstract:
+
+| Label | Assigned when |
+|---|---|
+| **Benchmark** | The headline contribution is a new benchmark, dataset, testbed or evaluation suite — a `…Bench`-style title, or a release verb ("we introduce / release / curate") near a resource noun |
+| **Evaluation** | The headline contribution is measuring existing models — study/audit/comparison titles plus corroborating abstract evidence |
+| **Other** | Everything else (new methods, theory, applications) |
+
+Two rules do most of the disambiguation work: phrases that merely *use* benchmarks ("on standard benchmarks") are penalised rather than counted, and a paper that ships a benchmark alongside a new method is classified by its title — a method paper stays `Other`. The classifier favours precision over recall, so a small number of study papers land in `Other`. It can be re-run on its own to relabel the sheet in place:
+
+```bash
+python icml_2026/src/classify_paper_type.py
+```
 
 ---
 
